@@ -621,11 +621,11 @@ options:
             max_capacity:
                 description:
                     - Upper bound on number of Application Gateway capacity.
-                type: integer
+                type: int
             min_capacity:
                 description:
                     - Lower bound on number of Application Gateway capacity.
-                type: integer
+                type: int
     gateway_state:
         description:
             - Start or Stop the application gateway. When specified, no updates will occur to the gateway.
@@ -1280,8 +1280,8 @@ url_path_maps_spec = dict(
 )
 
 autoscale_configuration_spec = dict(
-    max_capacity=dict(type='integer'),
-    min_capacity=dict(type='integer'),
+    max_capacity=dict(type='int'),
+    min_capacity=dict(type='int'),
 )
 
 
