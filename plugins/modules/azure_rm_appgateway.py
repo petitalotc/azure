@@ -612,6 +612,20 @@ options:
                     - Rewrite rule set for the path map.
                     - Can be the name of the rewrite rule set or full resource ID.
                 version_added: "1.11.0"
+    autoscale_configuration:
+        version_added: "1.14.0"
+        description:
+            - Autoscale configuration of the application gateway resource.
+        type: dict
+        suboptions:
+            max_capacity:
+                description:
+                    - Upper bound on number of Application Gateway capacity.
+                type: integer
+            min_capacity:
+                description:
+                    - Lower bound on number of Application Gateway capacity.
+                type: integer
     gateway_state:
         description:
             - Start or Stop the application gateway. When specified, no updates will occur to the gateway.
@@ -1037,6 +1051,47 @@ EXAMPLES = '''
         include_query_string: true
         url_path_maps:
           - "path_mappings"
+          
+- name: Create instance of Application Gateway with autoscale configuration
+  azure_rm_appgateway:
+    resource_group: myResourceGroup
+    name: myAppGateway
+    sku:
+      name: standard_small
+      tier: standard
+    autoscale_configuration:
+      max_capacity: 2
+      min_capacity: 1
+    gateway_ip_configurations:
+      - subnet:
+          id: "{{ subnet_id }}"
+        name: app_gateway_ip_config
+    frontend_ip_configurations:
+      - subnet:
+          id: "{{ subnet_id }}"
+        name: sample_gateway_frontend_ip_config
+    frontend_ports:
+      - port: 90
+        name: ag_frontend_port
+    backend_address_pools:
+      - backend_addresses:
+          - ip_address: 10.0.0.4
+        name: test_backend_address_pool
+    backend_http_settings_collection:
+      - port: 80
+        protocol: http
+        cookie_based_affinity: enabled
+        name: sample_appgateway_http_settings
+    http_listeners:
+      - frontend_ip_configuration: sample_gateway_frontend_ip_config
+        frontend_port: ag_frontend_port
+        name: sample_http_listener
+    request_routing_rules:
+      - rule_type: Basic
+        backend_address_pool: test_backend_address_pool
+        backend_http_settings: sample_appgateway_http_settings
+        http_listener: sample_http_listener
+        name: rule1
 
 - name: Stop an Application Gateway instance
   azure_rm_appgateway:
@@ -1224,6 +1279,11 @@ url_path_maps_spec = dict(
     default_rewrite_rule_set=dict(type='str'),
 )
 
+autoscale_configuration_spec = dict(
+    max_capacity=dict(type='integer'),
+    min_capacity=dict(type='integer'),
+)
+
 
 class AzureRMApplicationGateways(AzureRMModuleBase):
     """Configuration class for an Azure RM Application Gateway resource"""
@@ -1298,6 +1358,10 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
             ),
             request_routing_rules=dict(
                 type='list'
+            ),
+            autoscale_configuration=dict(
+                type='dict',
+                options=autoscale_configuration_spec,
             ),
             gateway_state=dict(
                 type='str',
@@ -1674,6 +1738,8 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
                     self.parameters["request_routing_rules"] = ev
                 elif key == "etag":
                     self.parameters["etag"] = kwargs[key]
+                elif key == "autoscale_configuration":
+                    self.parameters["autoscale_configuration"] = kwargs[key]
 
         old_response = None
         response = None
@@ -1723,7 +1789,8 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
                     not compare_arrays(old_response, self.parameters, 'backend_http_settings_collection') or
                     not compare_arrays(old_response, self.parameters, 'request_routing_rules') or
                     not compare_arrays(old_response, self.parameters, 'http_listeners') or
-                    not compare_arrays(old_response, self.parameters, 'url_path_maps')):
+                    not compare_arrays(old_response, self.parameters, 'url_path_maps') or
+                    not compare_arrays(old_response, self.parameters, 'autoscale_configuration')):
 
                 self.to_do = Actions.Update
             else:
