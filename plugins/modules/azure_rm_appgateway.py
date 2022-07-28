@@ -626,6 +626,84 @@ options:
                 description:
                     - Lower bound on number of Application Gateway capacity.
                 type: int
+    web_application_firewall_configuration:
+        version_added: "1.14.0"
+        description:
+            - Web application firewall configuration of the application gateway reosurce.
+        type: dict
+        suboptions:
+            disabled_rule_groups:
+                description:
+                    - The disabled rule groups.
+                type: list
+                elements: dict
+                suboptions:
+                    rule_group_name:
+                        description:
+                            - The name of the rule group that will be disabled.
+                        type: string
+                    rules:
+                        description:
+                            - The list of rules that will be disabled. If null, all rules of the rule group will be disabled.
+                        type: list
+                        elements: integer
+            enabled:
+                description:
+                    - Whether the web application firewall is enabled or not.
+                type: bool
+            exclusions:
+                description:
+                    - The exclusion list.
+                type: list
+                elements: dict
+                suboptions:
+                    match_variable:
+                        description:
+                            - The variable to be excluded.
+                        type: string
+                    selector:
+                        description:
+                            - When matchVariable is a collection, operator used to specify which elements in the collection this exclusion applies to.
+                        type: string
+                    selector_match_operator:
+                        description:
+                            - When matchVariable is a collection, operate on the selector to specify which elements in the collection this exclusion applies to.
+                        type: string
+            file_upload_limit_in_mb:
+                description:
+                    - Maximum file upload size in Mb for WAF.
+                type: integer
+            firewall_mode:
+                description:
+                    - Web application firewall mode.
+                type: string
+                choices:
+                    - 'Detection'
+                    - 'Prevention'
+            max_request_body_size:
+                description:
+                    - Maximum request body size for WAF.
+                type: integer
+            max_request_body_size_in_kb:
+                description:
+                    - Maximum request body size in Kb for WAF.
+                type: integer
+            request_body_check:
+                description:
+                    - Whether allow WAF to check request Body.
+                type: bool
+            rule_set_type:
+                description:
+                    - The type of the web application firewall rule set. Possible values are: 'OWASP'.
+                type: string
+                choices:
+                    - 'OWASP'
+            rule_set_version:
+                description:
+                    - The version of the rule set type.
+                type: string
+            
+>>>>>>> add waf configuration settings
     gateway_state:
         description:
             - Start or Stop the application gateway. When specified, no updates will occur to the gateway.
@@ -1092,6 +1170,53 @@ EXAMPLES = '''
         backend_http_settings: sample_appgateway_http_settings
         http_listener: sample_http_listener
         name: rule1
+        
+- name: Create instance of Application Gateway waf_v2 with waf configuration 
+  azure_rm_appgateway:
+    resource_group: myResourceGroup
+    name: myAppGateway
+    sku:
+      name: waf_v2
+      tier: waf_v2
+      capacity: 2
+    gateway_ip_configurations:
+      - subnet:
+          id: "{{ subnet_id }}"
+        name: app_gateway_ip_config
+    frontend_ip_configurations:
+      - subnet:
+          id: "{{ subnet_id }}"
+        name: sample_gateway_frontend_ip_config
+    frontend_ports:
+      - port: 90
+        name: ag_frontend_port
+    backend_address_pools:
+      - backend_addresses:
+          - ip_address: 10.0.0.4
+        name: test_backend_address_pool
+    backend_http_settings_collection:
+      - port: 80
+        protocol: http
+        cookie_based_affinity: enabled
+        name: sample_appgateway_http_settings
+    http_listeners:
+      - frontend_ip_configuration: sample_gateway_frontend_ip_config
+        frontend_port: ag_frontend_port
+        name: sample_http_listener
+    request_routing_rules:
+      - rule_type: Basic
+        backend_address_pool: test_backend_address_pool
+        backend_http_settings: sample_appgateway_http_settings
+        http_listener: sample_http_listener
+        name: rule1
+    web_application_firewall_configuration:
+      - enabled: true
+        firewall_mode: Detection
+        rule_set_type: OWASP,
+        rule_set_version: 3.0,
+        request_body_check: true,
+        max_request_body_size_in_kb: 128,
+        file_upload_limit_in_mb: 100
 
 - name: Stop an Application Gateway instance
   azure_rm_appgateway:
@@ -1284,6 +1409,30 @@ autoscale_configuration_spec = dict(
     min_capacity=dict(type='int'),
 )
 
+waf_configuration_exclusions_spec = dict(
+    match_variable=dict(type='string'),
+    selector=dict(type='string'),
+    selector_match_operator=dict(type='string'),
+)
+
+waf_configuration_disabled_rule_groups_spec = dict(
+    rule_group_name=dict(type='string'),
+    rules=dict(type='list', elements='integer'),
+)
+
+web_application_firewall_configuration_spec = dict(
+    enabled=dict(type='bool'),
+    firewall_mode=dict(type='string', choices=['Detection', 'Prevention']),
+    rule_set_type=dict(type='string', choices=['OWASP']),
+    rule_set_version=dict(type='string'),
+    request_body_check=dict(type='bool'),
+    max_request_body_size=dict(type='integer'),
+    max_request_body_size_in_kb=dict(type='integer'),
+    file_upload_limit_in_mb=dict(type='integer'),
+    exclusions=dict(type='list', elements='dict', options=waf_configuration_exclusions_spec),
+    disabled_rule_groups=dict(type='list', elements='dict', options=waf_configuration_disabled_rule_groups_spec),
+)
+
 
 class AzureRMApplicationGateways(AzureRMModuleBase):
     """Configuration class for an Azure RM Application Gateway resource"""
@@ -1362,6 +1511,10 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
             autoscale_configuration=dict(
                 type='dict',
                 options=autoscale_configuration_spec,
+            ),
+            web_application_firewall_configuration=dict(
+                type='dict',
+                options=web_application_firewall_configuration_spec
             ),
             gateway_state=dict(
                 type='str',
@@ -1740,6 +1893,8 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
                     self.parameters["etag"] = kwargs[key]
                 elif key == "autoscale_configuration":
                     self.parameters["autoscale_configuration"] = kwargs[key]
+                elif key == "web_application_firewall_configuration":
+                    self.parameters["web_application_firewall_configuration"] = kwargs[key]
 
         old_response = None
         response = None
