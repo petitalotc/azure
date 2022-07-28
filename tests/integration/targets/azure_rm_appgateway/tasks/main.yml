@@ -1924,6 +1924,9 @@
     sku:
       name: standard_v2
       tier: standard_v2
+    autoscale_configuration:
+      max_capacity: 2
+      min_capacity: 1
     ssl_policy:
       policy_type: "predefined"
       policy_name: "ssl_policy20170401_s"
