@@ -663,11 +663,11 @@ options:
                         type: str
                     selector:
                         description:
-                            - When matchVariable is a collection, operator used to specify which elements in the collection this exclusion applies to.
+                            - When match_variable is a collection, operator used to specify which elements in the collection this exclusion applies to.
                         type: str
                     selector_match_operator:
                         description:
-                            - When matchVariable is a collection, operate on the selector to specify which elements in the collection this exclusion applies to.
+                            - When match_variable is a collection, operate on the selector to specify which elements in the collection this exclusion applies to.
                         type: str
             file_upload_limit_in_mb:
                 description:
