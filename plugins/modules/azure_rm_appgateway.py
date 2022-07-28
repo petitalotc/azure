@@ -641,12 +641,12 @@ options:
                     rule_group_name:
                         description:
                             - The name of the rule group that will be disabled.
-                        type: string
+                        type: str
                     rules:
                         description:
                             - The list of rules that will be disabled. If null, all rules of the rule group will be disabled.
                         type: list
-                        elements: integer
+                        elements: int
             enabled:
                 description:
                     - Whether the web application firewall is enabled or not.
@@ -660,34 +660,34 @@ options:
                     match_variable:
                         description:
                             - The variable to be excluded.
-                        type: string
+                        type: str
                     selector:
                         description:
                             - When matchVariable is a collection, operator used to specify which elements in the collection this exclusion applies to.
-                        type: string
+                        type: str
                     selector_match_operator:
                         description:
                             - When matchVariable is a collection, operate on the selector to specify which elements in the collection this exclusion applies to.
-                        type: string
+                        type: str
             file_upload_limit_in_mb:
                 description:
                     - Maximum file upload size in Mb for WAF.
-                type: integer
+                type: int
             firewall_mode:
                 description:
                     - Web application firewall mode.
-                type: string
+                type: str
                 choices:
                     - 'Detection'
                     - 'Prevention'
             max_request_body_size:
                 description:
                     - Maximum request body size for WAF.
-                type: integer
+                type: int
             max_request_body_size_in_kb:
                 description:
                     - Maximum request body size in Kb for WAF.
-                type: integer
+                type: int
             request_body_check:
                 description:
                     - Whether allow WAF to check request Body.
@@ -695,13 +695,13 @@ options:
             rule_set_type:
                 description:
                     - The type of the web application firewall rule set. Possible values are: 'OWASP'.
-                type: string
+                type: str
                 choices:
                     - 'OWASP'
             rule_set_version:
                 description:
                     - The version of the rule set type.
-                type: string
+                type: str
             
 >>>>>>> add waf configuration settings
     gateway_state:
@@ -1212,10 +1212,10 @@ EXAMPLES = '''
     web_application_firewall_configuration:
       - enabled: true
         firewall_mode: Detection
-        rule_set_type: OWASP,
-        rule_set_version: 3.0,
-        request_body_check: true,
-        max_request_body_size_in_kb: 128,
+        rule_set_type: OWASP
+        rule_set_version: 3.0
+        request_body_check: true
+        max_request_body_size_in_kb: 128
         file_upload_limit_in_mb: 100
 
 - name: Stop an Application Gateway instance
@@ -1410,25 +1410,25 @@ autoscale_configuration_spec = dict(
 )
 
 waf_configuration_exclusions_spec = dict(
-    match_variable=dict(type='string'),
-    selector=dict(type='string'),
-    selector_match_operator=dict(type='string'),
+    match_variable=dict(type='str'),
+    selector=dict(type='str'),
+    selector_match_operator=dict(type='str'),
 )
 
 waf_configuration_disabled_rule_groups_spec = dict(
-    rule_group_name=dict(type='string'),
-    rules=dict(type='list', elements='integer'),
+    rule_group_name=dict(type='str'),
+    rules=dict(type='list', elements='int'),
 )
 
 web_application_firewall_configuration_spec = dict(
     enabled=dict(type='bool'),
-    firewall_mode=dict(type='string', choices=['Detection', 'Prevention']),
-    rule_set_type=dict(type='string', choices=['OWASP']),
-    rule_set_version=dict(type='string'),
+    firewall_mode=dict(type='str', choices=['Detection', 'Prevention']),
+    rule_set_type=dict(type='str', choices=['OWASP']),
+    rule_set_version=dict(type='str'),
     request_body_check=dict(type='bool'),
-    max_request_body_size=dict(type='integer'),
-    max_request_body_size_in_kb=dict(type='integer'),
-    file_upload_limit_in_mb=dict(type='integer'),
+    max_request_body_size=dict(type='int'),
+    max_request_body_size_in_kb=dict(type='int'),
+    file_upload_limit_in_mb=dict(type='int'),
     exclusions=dict(type='list', elements='dict', options=waf_configuration_exclusions_spec),
     disabled_rule_groups=dict(type='list', elements='dict', options=waf_configuration_disabled_rule_groups_spec),
 )

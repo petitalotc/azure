@@ -2087,6 +2087,14 @@
         pick_host_name_from_backend_http_settings: true
         timeout: 30
         unhealthy_threshold: 2
+    web_application_firewall_configuration:
+      - enabled: true
+        firewall_mode: "Detection"
+        rule_set_type: "OWASP"
+        rule_set_version: "3.0"
+        request_body_check: true
+        max_request_body_size_in_kb: 128
+        file_upload_limit_in_mb: 100
   register: output
 - name: Assert the resource instance is well created
   assert:
@@ -2096,7 +2104,7 @@
 - name: Try to create waf_v2 instance of Application Gateway with waf configuration - no update
   azure_rm_appgateway:
     resource_group: "{{ resource_group }}"
-    name: "appgateway-v2-{{ rpfx }}"
+    name: "appgateway-waf-v2-{{ rpfx }}"
     sku:
       name: waf_v2
       tier: waf_v2
@@ -2174,6 +2182,14 @@
         pick_host_name_from_backend_http_settings: true
         timeout: 30
         unhealthy_threshold: 2
+    web_application_firewall_configuration:
+      - enabled: true
+        firewall_mode: "Detection"
+        rule_set_type: "OWASP"
+        rule_set_version: "3.0"
+        request_body_check: true
+        max_request_body_size_in_kb: 128
+        file_upload_limit_in_mb: 100
   register: output
 - name: Assert the resource instance is not updated
   assert:
@@ -2251,6 +2267,17 @@
   azure_rm_appgateway:
     resource_group: "{{ resource_group }}"
     name: "appgateway-v2-{{ rpfx }}"
+    state: absent
+  register: output
+- name: Assert the state has changed
+  assert:
+    that:
+      - output.changed
+
+- name: Delete waf_v2 instance of Application Gateway
+  azure_rm_appgateway:
+    resource_group: "{{ resource_group }}"
+    name: "appgateway-waf-v2-{{ rpfx }}"
     state: absent
   register: output
 - name: Assert the state has changed
