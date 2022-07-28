@@ -702,8 +702,6 @@ options:
                 description:
                     - The version of the rule set type.
                 type: str
-            
->>>>>>> add waf configuration settings
     gateway_state:
         description:
             - Start or Stop the application gateway. When specified, no updates will occur to the gateway.
