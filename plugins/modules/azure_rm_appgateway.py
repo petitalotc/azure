@@ -1811,7 +1811,7 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
                                     del item2['redirect_configuration']
                                 if item2['rewrite_rule_set']:
                                     id = item2['rewrite_rule_set']
-                                    id = id if is_valid_resource_id(id) else rerite_rule_set_id(self.subscription_id,
+                                    id = id if is_valid_resource_id(id) else rewrite_rule_set_id(self.subscription_id,
                                                                                                 kwargs['resource_group'],
                                                                                                 kwargs['name'],
                                                                                                 id)
@@ -1829,7 +1829,7 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
                             del item['default_redirect_configuration']
                         if item['default_rewrite_rule_set']:
                             id = item['default_rewrite_rule_set']
-                            id = id if is_valid_resource_id(id) else rerite_rule_set_id(self.subscription_id,
+                            id = id if is_valid_resource_id(id) else rewrite_rule_set_id(self.subscription_id,
                                                                                         kwargs['resource_group'],
                                                                                         kwargs['name'],
                                                                                         id)
@@ -1880,7 +1880,7 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
                             item['url_path_map'] = {'id': id}
                         if item.get('rewrite_rule_set'):
                             id = item.get('rewrite_rule_set')
-                            id = id if is_valid_resource_id(id) else rerite_rule_set_id(self.subscription_id,
+                            id = id if is_valid_resource_id(id) else rewrite_rule_set_id(self.subscription_id,
                                                                                         kwargs['resource_group'],
                                                                                         kwargs['name'],
                                                                                         id)
@@ -2233,7 +2233,7 @@ def request_routing_rule_id(subscription_id, resource_group_name, appgateway_nam
     )
 
 
-def rerite_rule_set_id(subscription_id, resource_group_name, appgateway_name, name):
+def rewrite_rule_set_id(subscription_id, resource_group_name, appgateway_name, name):
     """Generate the id for a rewrite rule set in an application gateway"""
     return '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Network/applicationGateways/{2}/rewriteRuleSets/{3}'.format(
         subscription_id,
