@@ -1929,9 +1929,9 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
             elif (self.parameters['location'] != old_response['location'] or
                     self.parameters['sku']['name'] != old_response['sku']['name'] or
                     self.parameters['sku']['tier'] != old_response['sku']['tier'] or
-                    self.parameters['sku']['capacity'] != old_response['sku']['capacity'] or
+                    self.parameters['sku'].get('capacity', None) != old_response['sku'].get('capacity', None) or
                     not compare_arrays(old_response, self.parameters, 'authentication_certificates') or
-                    not compare_arrays(old_response, self.parameters, 'ssl_policy') or
+                    not compare_dicts(old_response, self.parameters, 'ssl_policy') or
                     not compare_arrays(old_response, self.parameters, 'gateway_ip_configurations') or
                     not compare_arrays(old_response, self.parameters, 'redirect_configurations') or
                     not compare_arrays(old_response, self.parameters, 'rewrite_rule_sets') or
@@ -1943,7 +1943,7 @@ class AzureRMApplicationGateways(AzureRMModuleBase):
                     not compare_arrays(old_response, self.parameters, 'request_routing_rules') or
                     not compare_arrays(old_response, self.parameters, 'http_listeners') or
                     not compare_arrays(old_response, self.parameters, 'url_path_maps') or
-                    not compare_arrays(old_response, self.parameters, 'autoscale_configuration')):
+                    not compare_dicts(old_response, self.parameters, 'autoscale_configuration')):
 
                 self.to_do = Actions.Update
             else:
@@ -2242,6 +2242,13 @@ def rewrite_rule_set_id(subscription_id, resource_group_name, appgateway_name, n
         name
     )
 
+
+def compare_dicts(old_params, new_params, param_name):
+    oldd = old_params.get(param_name, None)
+    newd = new_params.get(param_name, None)
+
+    newd = dict_merge(oldd, newd)
+    return newd == oldd
 
 def compare_arrays(old_params, new_params, param_name):
     old = old_params.get(param_name) or []
